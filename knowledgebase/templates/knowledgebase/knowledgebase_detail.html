@@ -1,0 +1,24 @@
+{% extends 'tickets/base.html' %}
+{% block content %}
+    <h1>Knowledge Base Article</h1>
+    <dl>
+        <dt>Author</dt>
+        <dd>{{ article.author }}</dd>
+        <dt>Description</dt>
+        <dd>{{ article.description }}</dd>
+        <dt>Keywords</dt>
+        <dd>{{ article.keywords }}</dd>
+        <dt>Published</dt>
+        <dd>{{ article.pub_date }}</dd>
+    </dl>
+    {% if user.is_authenticated and user.username == article.author or user.is_staff %}
+        <p>
+            <a class="btn btn-primary" href="{% url 'knowledgebase:edit' article.id %}">Edit</a>
+        </p>
+        <form method="post" action="{% url 'knowledgebase:delete' article.id %}">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+    {% endif %}
+    <p><a href="{% url 'knowledgebase:index' %}">Back to Knowledge Base</a></p>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'tickets/base.html' %}
+{% block search %}
+    <form method="GET" action="{% url 'projects:search' %}">
+        <input name="q" value="{{request.GET.q}}" placeholder="Search projects">
+        <button class="btn btn-primary" type="submit">
+            Search
+        </button>
+    </form>
+{% endblock %}
+{% block content %}
+    <h1>Projects</h1>
+    {% if project_list %}
+	<table class="table table-striped">
+            <caption>Open Projects</caption>
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Requestor</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Assigned</th>
+                    <th scope="col">Closed/Opened</th>
+                    <th scope="col">Date Opened</th>
+                </tr>
+            </thead>
+            <tbody>
+	        {% for project in project_list %}
+		<tr>
+            <td><a href="/projects/projects/{{ project.id }}/">{{project.id}}</a></td>
+            <td>{{ project.requestor_name }}</td>
+            <td>{{ project.description }}</td>
+            <td>{{ project.assigned }}</td>
+            <td>
+                <label class="switch">
+                    <input type="checkbox" disabled>
+                    <span class="slider round"></span>
+                </label>
+            </td>
+            <td>{{ project.pub_date }}</td>
+        </tr>
+	        {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+	<p>No projects are available.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+name: Django CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Upgrade packaging tools
+        run: python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      - name: Check migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run functional tests
+        run: python manage.py test --verbosity 2
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Validate Compose configuration
+        run: docker compose config
+
+      - name: Validate configurable port mapping
+        env:
+          APP_PORT: "18080"
+          CONTAINER_PORT: "18081"
+        run: |
+          docker compose config > /tmp/compose-config.yml
+          grep -q 'published: "18080"' /tmp/compose-config.yml
+          grep -q 'target: 18081' /tmp/compose-config.yml
+
+      - name: Validate example environment file
+        run: |
+          docker compose --env-file .env.example config > /tmp/compose-example.yml
+          grep -q 'published: "8000"' /tmp/compose-example.yml
+          grep -q 'target: 8000' /tmp/compose-example.yml
+
+      - name: Build local image
+        run: docker compose build test
+
+      - name: Verify Django in Compose
+        run: docker compose run --rm test python manage.py check

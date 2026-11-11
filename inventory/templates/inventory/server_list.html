@@ -1,0 +1,27 @@
+{% extends 'tickets/base.html' %}
+{% block search %}
+    <form method="GET" action="{% url 'inventory:search' %}">
+        <input name="q" value="{{request.GET.q}}" placeholder="Search system names">
+        <button class="btn btn-primary" type="submit">
+            Search
+        </button>
+    </form>
+{% endblock %}
+{% block content %}
+    <h1>Servers</h1>
+    {% if server_list %}
+	<table class="table table-striped">
+            <caption>List of servers</caption>
+            <thead>
+                <tr><th scope="col">Name</th><th scope="col">Cluster</th><th scope="col">Vendor</th><th scope="col">OS</th></tr>
+            </thead>
+            <tbody>
+	        {% for server in server_list %}
+		<tr><td><a href="/inventory/server/{{ server.id }}/">{{server.server_name }}</a></td><td>{{ server.cluster }}</td><td>{{ server.vendor }}</td><td>{{ server.Operating_System }}</td></tr>
+	        {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+	<p>No systems are available.</p>
+    {% endif %}
+{% endblock %}

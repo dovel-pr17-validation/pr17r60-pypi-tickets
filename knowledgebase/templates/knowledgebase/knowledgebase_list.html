@@ -1,0 +1,57 @@
+{% extends 'tickets/base.html' %}
+{% block content %}
+    <h1>Knowledge Base Articles</h1>
+
+    <form method="get" action="{% url 'knowledgebase:search' %}" class="mb-3">
+        <label class="form-label" for="knowledgebase-search">Search articles</label>
+        <div class="input-group">
+            <input
+                id="knowledgebase-search"
+                class="form-control"
+                type="search"
+                name="q"
+                value="{{ query|default:'' }}"
+                placeholder="Description, keywords, or author"
+            >
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    {% if user.is_authenticated %}
+        <p>
+            <a class="btn btn-primary" href="{% url 'knowledgebase:new' %}">Create Article</a>
+        </p>
+    {% endif %}
+
+    {% if knowledgebase_list %}
+        <table class="table table-striped">
+            <caption>Knowledge Base Articles</caption>
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Keywords</th>
+                    <th scope="col">Published</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in knowledgebase_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'knowledgebase:detail' article.id %}">
+                                {{ article.id }}
+                            </a>
+                        </td>
+                        <td>{{ article.author }}</td>
+                        <td>{{ article.description }}</td>
+                        <td>{{ article.keywords }}</td>
+                        <td>{{ article.pub_date }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No knowledge base articles are available.</p>
+    {% endif %}
+{% endblock %}
